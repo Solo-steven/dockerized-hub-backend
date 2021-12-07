@@ -13,7 +13,12 @@ var compression = require("compression");
 var cookieParser = require("cookie-parser");
 var helmet = require("helmet");
 var config = require("./config");
+const cors = require("cors");
 
+app.use(cors({
+    credentials: true,
+    origin: config.cors
+}));
 app.use(helmet());
 app.use(flash());
 app.use(expressValidator());

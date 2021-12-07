@@ -15,6 +15,7 @@ router.get("/fblogin", middleware.checkLogin(1), function (req, res) {
 });
 
 router.get("/fbcheck", middleware.checkLogin(1), function (req, res) {
+    console.log("[GET] /user/fbcheck, code is ", req.query.code);
     if (req.query.code) {
         graph.authorize({
             "client_id": config.fb.appid,
@@ -38,10 +39,10 @@ router.get("/fbcheck", middleware.checkLogin(1), function (req, res) {
                         // res.send(user);
                         res.redirect('/');
                     } else {
-                    	var check_key = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+                        var check_key = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
                         var code = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
                         code = 'nckuhub' + code.substring(1, 14);
-                        while (code.length != 20){
+                        while (code.length != 20) {
                             code = 'nckuhub' + Math.random().toString(36).substring(2, 15);
                         }
                         db.Insert('user', {
@@ -57,7 +58,7 @@ router.get("/fbcheck", middleware.checkLogin(1), function (req, res) {
                             db.Insert('messenger_code', {
                                 'code': code,
                                 'user_id': result.insertId
-                            }, function(err, result){
+                            }, function (err, result) {
                                 if (err) console.log(err);
                                 res.cookie("isLogin", 1, {
                                     maxAge: 1000 * 60 * 60 * 12 * 2 * 30
@@ -67,7 +68,7 @@ router.get("/fbcheck", middleware.checkLogin(1), function (req, res) {
                                 });
                                 console.log("======create user======");
                                 console.log(result);
-                                res.redirect('/');
+                                res.redirect('http://localhost:4200/');
                             })
                         })
                     }
@@ -75,7 +76,7 @@ router.get("/fbcheck", middleware.checkLogin(1), function (req, res) {
             });
         });
     } else {
-        res.redirect('/');
+        res.redirect('http://localhost:4200/');
     }
 });
 
@@ -99,15 +100,15 @@ router.get('/getList/:userID', function (req, res) {
     console.log('\n' + 'GET /course/' + userID);
     if (userID.match(/\D/g)) { // if ID isn't the digital.
         res.redirect('/');
-    }else{
-        db.Query('SELECT userName, courseID FROM `tableList` WHERE userID='+userID ,function(name_table){
-            db.Query('SELECT courseID FROM `wishList` WHERE userID='+userID,function(wish){
-                data = {'now_wishlist':[], 'now_table':[]}
-                for (let n in name_table){
+    } else {
+        db.Query('SELECT userName, courseID FROM `tableList` WHERE userID=' + userID, function (name_table) {
+            db.Query('SELECT courseID FROM `wishList` WHERE userID=' + userID, function (wish) {
+                data = { 'now_wishlist': [], 'now_table': [] }
+                for (let n in name_table) {
                     console.log(name_table[n])
                     data['now_table'].push(name_table[n]['courseID'])
                 }
-                for (let w in wish){
+                for (let w in wish) {
                     data['now_wishlist'].push(wish[w]['courseID'])
                 }
                 res.json(data);
@@ -130,16 +131,16 @@ router.get('/getList/:userID', function (req, res) {
                 //     res.json(data)
                 // }      
             })
-        
+
         })
-    }   
+    }
 });
 
 router.get('/getDraft/:uid', function (req, res) {
     uid = req.params.uid;
     teacher = req.query.teacher;
     course = req.query.course;
-    redis.get(cache.draftKey(course, teacher, uid),function (err, result) {
+    redis.get(cache.draftKey(course, teacher, uid), function (err, result) {
         res.send(result)
     });
 });
@@ -155,7 +156,7 @@ router.post('/setDraft/:uid', function (req, res) {
 router.post('/delDraft/:uid', function (req, res) {
     uid = req.params.uid
     let data = req.body;
-    redis.del(cache.draftKey(data["course"], data["teacher"], uid),function (error, result) {
+    redis.del(cache.draftKey(data["course"], data["teacher"], uid), function (error, result) {
         res.send('done')
     });
 });
@@ -178,13 +179,13 @@ router.post('/update', middleware.checkLogin(), function (req, res) {
 
 router.get('/info', function (req, res) {
     console.log('\n' + 'GET /user/info');
-    if (req.user === undefined){
+    if (req.user === undefined) {
         res.status(404).send('not login');
     }
-    else{
-        res.send({user: req.user});    
+    else {
+        res.send({ user: req.user });
     }
-    
+
 });
 
 router.get('/findHelperService/', function (req, res) {
@@ -193,27 +194,27 @@ router.get('/findHelperService/', function (req, res) {
         'messenger_code': "",
         'point': 0
     }
-    db.Query('select * from messenger_code where user_id =' + uid, function(messenger_code){
+    db.Query('select * from messenger_code where user_id =' + uid, function (messenger_code) {
         messenger_code = messenger_code[0]
-        if( messenger_code.is_used == 1){
+        if (messenger_code.is_used == 1) {
             data.messenger_code = messenger_code.code;
         }
-        db.Query('select * from user where id =' + uid, function(userInfo){
+        db.Query('select * from user where id =' + uid, function (userInfo) {
             userInfo = userInfo[0];
             data.point = userInfo.point;
             res.send(data);
         })
-        
+
     })
 });
 
 router.get('/Service/', function (req, res) {
     var uid = req.user.id
-    db.Query('select * from user where id =' + uid, function(userInfo){
+    db.Query('select * from user where id =' + uid, function (userInfo) {
         userInfo = userInfo[0];
-        if(userInfo.point >= 5){
-            db.Query("update user Set point = point - 5 where id = " + uid, function(result){
-                db.Query('update messenger_code Set is_used = 1 where user_id = ' + uid, function(messenger_code){
+        if (userInfo.point >= 5) {
+            db.Query("update user Set point = point - 5 where id = " + uid, function (result) {
+                db.Query('update messenger_code Set is_used = 1 where user_id = ' + uid, function (messenger_code) {
                     res.send("success")
                 });
             });
@@ -239,11 +240,11 @@ router.post('/signup', function (req, res) {
 
     console.log(data);
     //db.Query('user')
-    db.Insert('user', data, function(err, result){
-        
-        if(err) console.log(err);
-        else{
-            gmailSend.sendMail('nckuhub@gmail.com', 'sginup go go go! '+url+data['check_key']);
+    db.Insert('user', data, function (err, result) {
+
+        if (err) console.log(err);
+        else {
+            gmailSend.sendMail('nckuhub@gmail.com', 'sginup go go go! ' + url + data['check_key']);
         }
     })
     res.send("success");
@@ -252,16 +253,16 @@ router.post('/signup', function (req, res) {
 
 
 router.get('/signup_url/:check_key', function (req, res) {
-    
+
     var user_check_key = req.params.check_key;
     var datas = {
         role: 3
     };
-    var conditions ={
-        'check_key' : user_check_key
+    var conditions = {
+        'check_key': user_check_key
     }
-    db.Update('user',datas,conditions,function(results){
-        
+    db.Update('user', datas, conditions, function (results) {
+
         if (results.affectedRows == 0)
             res.status(404).send("Sorry, wrong url")
         else
@@ -269,7 +270,7 @@ router.get('/signup_url/:check_key', function (req, res) {
     })
 })
 
-router.post("/updateEmail", function(req, res){
+router.post("/updateEmail", function (req, res) {
     var id = req.body.id;
     var email = req.body['email'];
     var check_key = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -277,15 +278,15 @@ router.post("/updateEmail", function(req, res){
         'email': email,
         'check_key': check_key
     };
-    db.Update('user', data, {"id": id}, function(results){
+    db.Update('user', data, { "id": id }, function (results) {
         res.send("success");
     })
     sendVerificationMail(id, email, check_key);
 })
 
-function sendVerificationMail(id, email, check_key){
-    db.Update('user', {'role': 0}, {"id":id}, function(result){});
-    let url = "https://nckuhub.com/api/user/signup_url/"+ check_key;
-    gmailSend.sendMail(email, '驗證網址: '+ url);
+function sendVerificationMail(id, email, check_key) {
+    db.Update('user', { 'role': 0 }, { "id": id }, function (result) { });
+    let url = "https://nckuhub.com/api/user/signup_url/" + check_key;
+    gmailSend.sendMail(email, '驗證網址: ' + url);
 }
 module.exports = router;
