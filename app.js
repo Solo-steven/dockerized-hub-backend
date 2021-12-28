@@ -85,6 +85,5 @@ app.use("/admin", function (req, res, next) {
 
 
 setInterval(() => require("./script"), 1000 * 60 * 10); // 更新心得數
-
 app.listen(process.env.PORT || 3000); //監聽3000port
-console.log("running on port 3000");
+console.log(`running on port ${process.env.PORT || 3000}`);

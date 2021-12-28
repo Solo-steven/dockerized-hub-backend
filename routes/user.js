@@ -37,7 +37,7 @@ router.get("/fbcheck", middleware.checkLogin(1), function (req, res) {
                         console.log("======user======");
                         console.log(user);
                         // res.send(user);
-                        res.redirect('/');
+                        res.redirect('http://localhost:4200');
                     } else {
                         var check_key = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
                         var code = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -67,7 +67,7 @@ router.get("/fbcheck", middleware.checkLogin(1), function (req, res) {
                                     maxAge: 1000 * 60 * 60 * 12 * 2 * 30
                                 });
                                 console.log("======create user======");
-                                console.log(result);
+                                console.log(result, "redirect4200");
                                 res.redirect('http://localhost:4200/');
                             })
                         })
