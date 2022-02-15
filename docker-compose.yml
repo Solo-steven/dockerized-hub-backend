@@ -10,7 +10,6 @@ services:
       - MYSQL_ROOT_PASSWORD=pw
       - MYSQL_ROOT_HOST=%
     volumes:
-      - ./database/data:/var/lib/mysql
       - ./database/sql:/sql
     ports:
       - 3400:3306
